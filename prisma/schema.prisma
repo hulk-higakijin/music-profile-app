@@ -55,14 +55,20 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+    id             String        @id @default(cuid())
+    name           String?
+    username       String        @unique
+    email          String?       @unique
+    emailVerified  DateTime?
+    image          String?
+    lastfmUsername String?
+    createdAt      DateTime      @default(now())
+    updatedAt      DateTime      @updatedAt
+    
+    accounts       Account[]
+    sessions       Session[]
+    posts          Post[]
+    musicProfile   MusicProfile?
 }
 
 model VerificationToken {
@@ -71,4 +77,35 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model MusicProfile {
+    id              String      @id @default(cuid())
+    userId          String      @unique
+    displayName     String
+    bio             String?
+    backgroundColor String      @default("#000000")
+    textColor       String      @default("#ffffff")
+    layout          String      @default("4x4")
+    isPublic        Boolean     @default(true)
+    createdAt       DateTime    @default(now())
+    updatedAt       DateTime    @updatedAt
+    
+    user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    musicItems      MusicItem[]
+}
+
+model MusicItem {
+    id            String       @id @default(cuid())
+    profileId     String
+    type          String       // "album" | "artist" | "track"
+    name          String
+    artist        String?
+    imageUrl      String?
+    spotifyUrl    String?
+    lastfmUrl     String?
+    position      Int
+    createdAt     DateTime     @default(now())
+    
+    profile       MusicProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 }
